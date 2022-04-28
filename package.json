@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "hardhat": "^2.9.3",
+    "solidity-sigutils": "^1.0.1"
+  },
+  "devDependencies": {
+    "erc721a": "^3.2.0"
+  }
+}
