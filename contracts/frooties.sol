@@ -12,11 +12,13 @@ contract Frooties is ERC721A {
   address public admin;
   /// @notice Address used to sign whitelist permits
   address public whitelistAdmin;
-
+  /// @notice Mapping of amounts minter per address
+  mapping(address => uint256) public amounts;
   /// @notice Enum of mint stages
   enum MintStage { PAUSED, WHITELIST, PUBLIC, ADMIN }
   /// @notice Current mint stage
   MintStage public currentMintStage = MintStage.PAUSED;
+
 
   constructor() ERC721A("Frooties", "FROOTIES") {}
 
@@ -27,7 +29,8 @@ contract Frooties is ERC721A {
   modifier mintChecks(uint256 quantity){
     require(totalSupply() + quantity <= maxSupply, "Max supply reached");
     require(msg.value >= quantity * price, "Insufficient payment");
-    require(quantity < 3, "Max 2");
+    amounts[msg.sender] += quantity;
+    require(amounts[msg.sender] < 3, "Max 2");
     _;
   }
 
@@ -44,11 +47,13 @@ contract Frooties is ERC721A {
    * @notice Mint tokens using permit signature
    * @param quantity Number of NFTs to mint
    */
-  function whitelistMint(uint256 quantity, string memory whitelistMessage, bytes memory signature) external payable mintChecks(quantity) {
+  function whitelistMint(uint256 quantity, bytes memory signature) external payable mintChecks(quantity) {
     require(currentMintStage == MintStage.WHITELIST, "Whitelist mint not active");
 
-    //TODO: verify signature
-    /* require(signer == whitelistAdmin, "Signer does not match"); */
+    bytes32 messageHash = keccak256(abi.encodePacked(quantity, msg.sender, address(this)));
+    bytes32 prefixHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+    address signer = recoverSigner(prefixHash, signatures);
+    require(signer == whitelistAdmin, "Signer does not match");
 
     _safeMint(msg.sender, quantity);
   }
