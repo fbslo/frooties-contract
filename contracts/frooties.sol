@@ -27,9 +27,9 @@ contract Frooties is ERC721A {
   /// @notice Start timestamp for whitelist mint
   uint256 public whitelistTimestamp = 1651845600; //Fri May 06 2022 16:00:00 GMT+0200
   /// @notice Start timestamp for public mint
-  uint256 public publicTimestamp = 1651849200; //Fri May 06 2022 17:00:00 GMT+0200
+  uint256 public publicTimestamp = 1651849200;    //Fri May 06 2022 17:00:00 GMT+0200
   /// @notice Start timestamp for reserve mint
-  uint256 public reserveTimestamp = 1651860000; //Fri May 06 2022 20:00:00 GMT+0200
+  uint256 public reserveTimestamp = 1651860000;   //Fri May 06 2022 20:00:00 GMT+0200
 
 
   constructor(address newWhitelistSigner) ERC721A("Frooties", "FROOTIES") {
