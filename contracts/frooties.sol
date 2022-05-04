@@ -4,32 +4,45 @@ pragma solidity ^0.8.4;
 import "erc721a/contracts/ERC721A.sol";
 
 contract Frooties is ERC721A {
+  /// @notice Base URI storing the metadata
+  string public baseURI = "https://metadata.thefrooties.com/";
   /// @notice Price to pay per NFT
   uint256 public price = 0.05 ether;
-  /// @notice Maxuimum supply
-  uint256 public maxSupply = 2222;
+  /// @notice Maximum supply
+  uint256 public maxSupply = 1111;
+  /// @notice Amount reserved for the team
+  uint256 public reservedAmount = 50;
+  /// @notice Sale supply (maxSupply - reserved for admin)
+  uint256 public saleSupply = maxSupply - reservedAmount;
   /// @notice Address that can call adminMint() and call()
   address public admin;
   /// @notice Address used to sign whitelist permits
   address public whitelistAdmin;
   /// @notice Mapping of amounts minter per address
   mapping(address => uint256) public amounts;
-  /// @notice Enum of mint stages
-  enum MintStage { PAUSED, WHITELIST, PUBLIC, ADMIN }
-  /// @notice Current mint stage
-  MintStage public currentMintStage = MintStage.PAUSED;
+
+  /// @notice Start timestamp for whitelist mint
+  uint256 public whitelistTimestamp = 1651845600; //Fri May 06 2022 16:00:00 GMT+0200
+  /// @notice Start timestamp for public mint
+  uint256 public publicTimestamp = 1651849200; //Fri May 06 2022 17:00:00 GMT+0200
+  /// @notice Start timestamp for reserve mint
+  uint256 public reserveTimestamp = 1651860000; //Fri May 06 2022 20:00:00 GMT+0200
 
 
-  constructor() ERC721A("Frooties", "FROOTIES") {}
+  constructor() ERC721A("Frooties", "FROOTIES") {
+    admin = msg.sender;
+    whitelistAdmin = msg.sender;
+  }
 
   /**
    * @notice Perform basic checks (max supply, limit per address, payment)
    * @param quantity Number of NFTs to mint
    */
   modifier mintChecks(uint256 quantity){
-    require(totalSupply() + quantity <= maxSupply, "Max supply reached");
+    require(totalSupply() + quantity <= saleSupply, "Sale supply reached");
     require(msg.value >= quantity * price, "Insufficient payment");
     amounts[msg.sender] += quantity;
+    if ()
     require(amounts[msg.sender] < 3, "Max 2");
     _;
   }
@@ -39,7 +52,7 @@ contract Frooties is ERC721A {
    * @param quantity Number of NFTs to mint
    */
   function mint(uint256 quantity) external payable mintChecks(quantity) {
-    require(currentMintStage == MintStage.PUBLIC, "Public mint not active");
+    require(block.timestamp > publicTimestamp, "Public mint not active");
     _safeMint(msg.sender, quantity);
   }
 
@@ -48,11 +61,11 @@ contract Frooties is ERC721A {
    * @param quantity Number of NFTs to mint
    */
   function whitelistMint(uint256 quantity, bytes memory signature) external payable mintChecks(quantity) {
-    require(currentMintStage == MintStage.WHITELIST, "Whitelist mint not active");
+    require(block.timestamp > whitelistTimestamp, "Whitelist mint not active");
 
-    bytes32 messageHash = keccak256(abi.encodePacked(quantity, msg.sender, address(this)));
+    bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, address(this)));
     bytes32 prefixHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
-    address signer = recoverSigner(prefixHash, signatures);
+    address signer = recoverSigner(prefixHash, signature);
     require(signer == whitelistAdmin, "Signer does not match");
 
     _safeMint(msg.sender, quantity);
@@ -62,17 +75,12 @@ contract Frooties is ERC721A {
    * @notice Mint tokens for free
    * @param quantity Number of NFTs to mint
    */
-  function adminMint(uint256 quantity) external {
-    require(currentMintStage == MintStage.ADMIN, "Admin mint not active");
+  function reserveMint(uint256 quantity) external {
+    require(block.timestamp > reserveTimestamp, "Reserve mint not active");
     require(totalSupply() + quantity <= maxSupply, "Max supply reached");
     require(msg.sender == admin, "Only admin");
 
     _safeMint(msg.sender, quantity);
-  }
-
-  function setMintStage(MintStage _mintStage) external {
-    require(msg.sender == admin, "Only admin");
-    currentMintStage = _mintStage;
   }
 
   /**
@@ -94,12 +102,25 @@ contract Frooties is ERC721A {
     to.call{value: value}(callData);
   }
 
+  function transferOut() external {
+    require(msg.sender == admin, "Only admin");
+    payable(admin).send(address(this).balance);
+  }
+
   /**
    * @notice Override default _baseURI function
    * @return baseURI as a string
    */
   function _baseURI() internal view virtual override returns (string memory) {
-    return 'https://frooties.com/';
+    return baseURI;
+  }
+
+  /**
+   * @notice Update baseURI
+   * @return newBaseURI as a string
+   */
+  function setBaseURI(string memory newBaseURI) external {
+    baseURI = newBaseURI;
   }
 
   /**
