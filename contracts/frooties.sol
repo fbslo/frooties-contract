@@ -17,8 +17,8 @@ contract Frooties is ERC721A {
   /// @notice Governance address
   address public admin;
   /// @notice Address used to sign whitelist permits
-  address public whitelistAdmin;
-  /// @notice Mapping of amounts minter per address
+  address public whitelistSigner;
+  /// @notice Mapping of amounts minted per address
   mapping(address => uint256) public amounts;
 
   /// @notice Start timestamp for whitelist mint
@@ -75,7 +75,7 @@ contract Frooties is ERC721A {
     bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, address(this)));
     bytes32 prefixHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
     address signer = recoverSigner(prefixHash, signature);
-    require(signer == whitelistAdmin, "Signer does not match");
+    require(signer == whitelistSigner, "Signer does not match");
 
     _safeMint(msg.sender, quantity);
   }
@@ -141,6 +141,14 @@ contract Frooties is ERC721A {
      publicTimestamp = newPublicTimestamp;
      reserveTimestamp = newReserveTimestamp;
    }
+
+   /**
+    * @notice Update admin addresses
+    */
+    function seTimestamp(uint256 newAdmin, uint256 newWhitelistSigner) external onlyOwner {
+      admin = newAdmin;
+      whitelistSigner = newWhitelistSigner;
+    }
 
   /**
    * @notice Recover signer address from signature
