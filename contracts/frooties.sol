@@ -14,7 +14,7 @@ contract Frooties is ERC721A {
   uint256 public reservedAmount = 50;
   /// @notice Sale supply (maxSupply - reserved for admin)
   uint256 public saleSupply = maxSupply - reservedAmount;
-  /// @notice Address that can call adminMint() and call()
+  /// @notice Governance address
   address public admin;
   /// @notice Address used to sign whitelist permits
   address public whitelistAdmin;
