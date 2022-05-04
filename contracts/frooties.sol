@@ -29,9 +29,9 @@ contract Frooties is ERC721A {
   uint256 public reserveTimestamp = 1651860000; //Fri May 06 2022 20:00:00 GMT+0200
 
 
-  constructor() ERC721A("Frooties", "FROOTIES") {
+  constructor(address newWhitelistAdmin) ERC721A("Frooties", "FROOTIES") {
     admin = msg.sender;
-    whitelistAdmin = msg.sender;
+    whitelistAdmin = newWhitelistAdmin;
   }
 
   /// @notice Verify caller is admin
@@ -48,8 +48,11 @@ contract Frooties is ERC721A {
     require(totalSupply() + quantity <= saleSupply, "Sale supply reached");
     require(msg.value >= quantity * price, "Insufficient payment");
     amounts[msg.sender] += quantity;
-    if ()
-    require(amounts[msg.sender] < 3, "Max 2");
+    if (block.timestamp >= publicTimestamp){
+      require(amounts[msg.sender] <= 3, "Max 3");
+    } else {
+      require(amounts[msg.sender] <= 2, "Max 2");
+    }
     _;
   }
 
@@ -58,7 +61,7 @@ contract Frooties is ERC721A {
    * @param quantity Number of NFTs to mint
    */
   function mint(uint256 quantity) external payable mintChecks(quantity) {
-    require(block.timestamp > publicTimestamp, "Public mint not active");
+    require(block.timestamp >= publicTimestamp, "Public mint not active");
     _safeMint(msg.sender, quantity);
   }
 
@@ -67,7 +70,7 @@ contract Frooties is ERC721A {
    * @param quantity Number of NFTs to mint
    */
   function whitelistMint(uint256 quantity, bytes memory signature) external payable mintChecks(quantity) {
-    require(block.timestamp > whitelistTimestamp, "Whitelist mint not active");
+    require(block.timestamp >= whitelistTimestamp, "Whitelist mint not active");
 
     bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, address(this)));
     bytes32 prefixHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
@@ -82,9 +85,11 @@ contract Frooties is ERC721A {
    * @param quantity Number of NFTs to mint
    */
   function reserveMint(uint256 quantity) external onlyOwner {
-    require(block.timestamp > reserveTimestamp, "Reserve mint not active");
+    require(block.timestamp >= reserveTimestamp, "Reserve mint not active");
+    require(amounts[address(0)] + quantity <= reservedAmount, "Max 50");
     require(totalSupply() + quantity <= maxSupply, "Max supply reached");
 
+    amounts[address(0)] += quantity;
     _safeMint(msg.sender, quantity);
   }
 
@@ -123,7 +128,6 @@ contract Frooties is ERC721A {
 
   /**
    * @notice Update baseURI
-   * @return newBaseURI as a string
    */
   function setBaseURI(string memory newBaseURI) external onlyOwner {
     baseURI = newBaseURI;
@@ -131,12 +135,11 @@ contract Frooties is ERC721A {
 
   /**
    * @notice Update starting times if needed
-   * @return newBaseURI as a string
    */
    function seTimestamp(uint256 newWhitelistTimestamp, uint256 newPublicTimestamp, uint256 newReserveTimestamp) external onlyOwner {
      whitelistTimestamp = newWhitelistTimestamp;
      publicTimestamp = newPublicTimestamp;
-     reserveTimestamp = newReserveTimestampl
+     reserveTimestamp = newReserveTimestamp;
    }
 
   /**
