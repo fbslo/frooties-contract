@@ -102,6 +102,9 @@ contract Frooties is ERC721A {
     to.call{value: value}(callData);
   }
 
+  /**
+   * @notice Used to transfer entire ETH balance to admin
+   */
   function transferOut() external {
     require(msg.sender == admin, "Only admin");
     payable(admin).send(address(this).balance);
