@@ -1,6 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+/// @title Frooties
+/// @author Frooties Team (fbsloXBT)
+
 import "erc721a/contracts/ERC721A.sol";
 
 contract Frooties is ERC721A {
