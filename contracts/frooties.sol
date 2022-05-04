@@ -34,6 +34,12 @@ contract Frooties is ERC721A {
     whitelistAdmin = msg.sender;
   }
 
+  /// @notice Verify caller is admin
+  modifier onlyOwner(){
+    require(msg.sender == admin, "Only owner");
+    _;
+  }
+
   /**
    * @notice Perform basic checks (max supply, limit per address, payment)
    * @param quantity Number of NFTs to mint
@@ -75,10 +81,9 @@ contract Frooties is ERC721A {
    * @notice Mint tokens for free
    * @param quantity Number of NFTs to mint
    */
-  function reserveMint(uint256 quantity) external {
+  function reserveMint(uint256 quantity) external onlyOwner {
     require(block.timestamp > reserveTimestamp, "Reserve mint not active");
     require(totalSupply() + quantity <= maxSupply, "Max supply reached");
-    require(msg.sender == admin, "Only admin");
 
     _safeMint(msg.sender, quantity);
   }
@@ -87,12 +92,11 @@ contract Frooties is ERC721A {
    * @notice Call any address (usefull for withdrawing ETH or retrieving tokens)
    * @dev Will not revert on failure
    * @param to Addresss to call
-   * @param value ETH amount
+   * @param value ETH amount in wei
    * @param signature Function signature
    * @param data Calldata to include
    */
-  function call(address to, uint256 value, string memory signature, bytes memory data) external {
-    require(msg.sender == admin, "Only admin");
+  function call(address to, uint256 value, string memory signature, bytes memory data) external onlyOwner {
     bytes memory callData;
     if (bytes(signature).length == 0) {
         callData = data;
@@ -105,8 +109,7 @@ contract Frooties is ERC721A {
   /**
    * @notice Used to transfer entire ETH balance to admin
    */
-  function transferOut() external {
-    require(msg.sender == admin, "Only admin");
+  function transferOut() external onlyOwner {
     payable(admin).send(address(this).balance);
   }
 
@@ -122,9 +125,19 @@ contract Frooties is ERC721A {
    * @notice Update baseURI
    * @return newBaseURI as a string
    */
-  function setBaseURI(string memory newBaseURI) external {
+  function setBaseURI(string memory newBaseURI) external onlyOwner {
     baseURI = newBaseURI;
   }
+
+  /**
+   * @notice Update starting times if needed
+   * @return newBaseURI as a string
+   */
+   function seTimestamp(uint256 newWhitelistTimestamp, uint256 newPublicTimestamp, uint256 newReserveTimestamp) external onlyOwner {
+     whitelistTimestamp = newWhitelistTimestamp;
+     publicTimestamp = newPublicTimestamp;
+     reserveTimestamp = newReserveTimestampl
+   }
 
   /**
    * @notice Recover signer address from signature
