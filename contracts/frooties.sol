@@ -29,9 +29,9 @@ contract Frooties is ERC721A {
   uint256 public reserveTimestamp = 1651860000; //Fri May 06 2022 20:00:00 GMT+0200
 
 
-  constructor(address newWhitelistAdmin) ERC721A("Frooties", "FROOTIES") {
+  constructor(address newWhitelistSigner) ERC721A("Frooties", "FROOTIES") {
     admin = msg.sender;
-    whitelistAdmin = newWhitelistAdmin;
+    whitelistSigner = newWhitelistSigner;
   }
 
   /// @notice Verify caller is admin
