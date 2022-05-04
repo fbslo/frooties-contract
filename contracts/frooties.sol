@@ -145,7 +145,7 @@ contract Frooties is ERC721A {
    /**
     * @notice Update admin addresses
     */
-    function seTimestamp(uint256 newAdmin, uint256 newWhitelistSigner) external onlyOwner {
+    function setGovernance(address newAdmin, address newWhitelistSigner) external onlyOwner {
       admin = newAdmin;
       whitelistSigner = newWhitelistSigner;
     }
