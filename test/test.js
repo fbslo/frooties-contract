@@ -234,4 +234,13 @@ describe("Frooties", function () {
     let vbBalance2 = await frooties.provider.getBalance(vb)
     expect(vbBalance2.sub(vbBalance)).to.equal(ethers.utils.parseEther("0.05"));
   });
+
+  /// --- CONTRACT --- \\\
+
+  it("should get token URI", async function () {
+    await frooties.mint(2, { value: ethers.utils.parseEther("0.1") });
+    let tokenURI = await frooties.tokenURI(1)
+    expect(tokenURI).to.equal("https://metadata.thefrooties.com/1");
+  });
+
 });
