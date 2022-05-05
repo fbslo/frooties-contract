@@ -7,7 +7,7 @@ const hre = require("hardhat");
 
 async function main() {
   const Frooties = await ethers.getContractFactory("Frooties");
-  frooties = await Frooties.deploy();
+  frooties = await Frooties.deploy("0x0e61a8fb14f6ac999646212d30b2192cd02080dd", "0x1f979d06b999d058a6a950452260beacf2f9d903");
   await frooties.deployed();
 
   console.log("Frooties deployed to:", frooties.address);

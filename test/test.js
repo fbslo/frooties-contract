@@ -10,12 +10,13 @@ describe("Frooties", function () {
   let whitelistAdminPrivateKey = "0xe7103cbdaf2db00c8b3a20cbcf6ebcf872fd8a95e243c876b50f5bc0edb6026e"
 
   let whitelistTimestamp = 1651845600; //Fri May 06 2022 16:00:00 GMT+0200
-  let publicTimestamp = 1651849200; //Fri May 06 2022 17:00:00 GMT+0200
-  let reserveTimestamp = 1651860000; //Fri May 06 2022 20:00:00 GMT+0200
+  let publicTimestamp = 1651870800; //Fri May 06 2022 23:00:00 GMT+0200
+  let reserveTimestamp = 1651874400; //Fri May 06 2022 24:00:00 GMT+0200
 
   async function init(){
+    const [signer] = await ethers.getSigners();
     const Frooties = await ethers.getContractFactory("Frooties");
-    frooties = await Frooties.deploy(whitelistAdmin);
+    frooties = await Frooties.deploy(signer.address, whitelistAdmin);
     await frooties.deployed();
   }
 
