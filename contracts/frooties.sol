@@ -9,8 +9,6 @@ import "erc721a/contracts/ERC721A.sol";
 contract Frooties is ERC721A {
   /// @notice Base URI storing the metadata
   string public baseURI = "https://metadata.thefrooties.com/";
-  /// @notice Price to pay per NFT
-  uint256 public price = 0.05 ether;
   /// @notice Maximum supply
   uint256 public maxSupply = 1111;
   /// @notice Amount reserved for the team
@@ -49,7 +47,6 @@ contract Frooties is ERC721A {
    */
   modifier mintChecks(uint256 quantity){
     require(totalSupply() + quantity <= saleSupply, "Sale supply reached");
-    require(msg.value >= quantity * price, "Insufficient payment");
     amounts[msg.sender] += quantity;
     if (block.timestamp >= publicTimestamp){
       require(amounts[msg.sender] <= 3, "Max 3");

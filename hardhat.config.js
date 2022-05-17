@@ -29,5 +29,10 @@ module.exports = {
       url: `https://main-light.eth.linkpool.io`,
       accounts: [process.env.PRIVATE_KEY]
     }
-  }
+  },
+  etherscan: {
+     apiKey: {
+       mainnet: process.env.ETHERSCAN_API_KEY
+     }
+   }
 };
